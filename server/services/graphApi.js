@@ -54,6 +54,22 @@ function normalizeLeadData(rawData, pageId = '', formId = '') {
   };
 }
 
+const devLeadRegistry = new Map();
+
+/**
+ * Registers lead details for simulation so that when the webhook handler
+ * queries Graph API for this leadgen_id, it returns the user's submitted details.
+ * @param {string} leadgenId
+ * @param {Object} leadData
+ */
+function registerTestLead(leadgenId, leadData) {
+  devLeadRegistry.set(String(leadgenId), leadData);
+}
+
+function clearTestLeads() {
+  devLeadRegistry.clear();
+}
+
 /**
  * Fetches lead details from Meta Graph API with retry backoff.
  *
@@ -75,6 +91,25 @@ async function fetchLead(leadgenId, options = {}) {
     backoffBaseMs = 100,
     axiosClient = axios,
   } = options;
+
+  // If this is a locally registered simulation lead from the UI, return it normalized
+  const registered = devLeadRegistry.get(String(leadgenId));
+  if (registered) {
+    return normalizeLeadData(
+      {
+        id: String(leadgenId),
+        form_id: registered.formId || formId || 'form_lead_ad_ui',
+        page_id: registered.pageId || pageId || 'page_meta_ad_ui',
+        field_data: [
+          { name: 'full_name', values: [registered.name || ''] },
+          { name: 'email', values: [registered.email || ''] },
+          { name: 'phone_number', values: [registered.phone || ''] },
+        ],
+      },
+      pageId,
+      formId
+    );
+  }
 
   let accessToken = options.accessToken;
   if (!accessToken) {
@@ -127,4 +162,6 @@ module.exports = {
   GRAPH_API_BASE,
   normalizeLeadData,
   fetchLead,
+  registerTestLead,
+  clearTestLeads,
 };

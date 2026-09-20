@@ -9,11 +9,12 @@ import {
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import { useLeadsQuery } from '../hooks/useLeadsQuery';
 import { useLeadSocket } from '../hooks/useLeadSocket';
 import { ConnectionStatus, Lead } from '../types/lead';
-import { simulateLead } from '../services/api';
+import { simulateLead, submitMetaLeadAd } from '../services/api';
 
 export interface LeadsScreenProps {
   serverUrl?: string;
@@ -23,6 +24,15 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
   const { leads, loading, error, refetch, setLeads } = useLeadsQuery(serverUrl);
   const [refreshing, setRefreshing] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [showForm, setShowForm] = useState(true);
+
+  // Form input fields for real test scenarios
+  const [inputName, setInputName] = useState('Ayush Soni');
+  const [inputEmail, setInputEmail] = useState('ayush@example.com');
+  const [inputPhone, setInputPhone] = useState('+91 9876543210');
+  const [inputForm, setInputForm] = useState('Product Demo Lead Form');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
   const handleSimulateLead = useCallback(async () => {
     try {
@@ -34,6 +44,34 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
       setIsSimulating(false);
     }
   }, [serverUrl]);
+
+  const handleSubmitLeadAd = useCallback(async () => {
+    if (!inputName.trim() || !inputEmail.trim()) {
+      setSubmitMessage('⚠️ Please enter both your name and email.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setSubmitMessage(null);
+      const res = await submitMetaLeadAd(
+        {
+          name: inputName.trim(),
+          email: inputEmail.trim(),
+          phone: inputPhone.trim() || undefined,
+          formId: inputForm.trim() || undefined,
+        },
+        serverUrl
+      );
+      setSubmitMessage(
+        `✅ Webhook Delivered (Ack ${res.webhookAckStatus})! HMAC Verified. Streamed live via Socket.IO.`
+      );
+    } catch (err: any) {
+      setSubmitMessage(`❌ Error triggering webhook: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [inputName, inputEmail, inputPhone, inputForm, serverUrl]);
 
   // Latest seen receivedAt timestamp for incremental reconnect resync
   const latestTimestamp = useMemo(() => {
@@ -191,6 +229,97 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
           <Text style={styles.errorText}>Error fetching leads: {error.message}</Text>
         </View>
       ) : null}
+
+      {showForm ? (
+        <View style={styles.formCard}>
+          <View style={styles.formCardHeader}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.formCardTitle}>📝 Meta Lead Ad Live Tester</Text>
+              <Text style={styles.formCardSubtitle}>
+                Submits your details through the full HMAC-SHA256 signed Webhook → Graph API → Socket.IO pipeline.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.formGrid}>
+            <View style={styles.inputFieldWrapper}>
+              <Text style={styles.fieldHeading}>Full Name *</Text>
+              <TextInput
+                style={styles.formInput}
+                placeholder="e.g. Ayush Soni"
+                placeholderTextColor="#64748b"
+                value={inputName}
+                onChangeText={setInputName}
+              />
+            </View>
+            <View style={styles.inputFieldWrapper}>
+              <Text style={styles.fieldHeading}>Email Address *</Text>
+              <TextInput
+                style={styles.formInput}
+                placeholder="e.g. ayush@example.com"
+                placeholderTextColor="#64748b"
+                value={inputEmail}
+                onChangeText={setInputEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+            <View style={styles.inputFieldWrapper}>
+              <Text style={styles.fieldHeading}>Phone Number</Text>
+              <TextInput
+                style={styles.formInput}
+                placeholder="e.g. +91 9876543210"
+                placeholderTextColor="#64748b"
+                value={inputPhone}
+                onChangeText={setInputPhone}
+              />
+            </View>
+            <View style={styles.inputFieldWrapper}>
+              <Text style={styles.fieldHeading}>Campaign / Form Name</Text>
+              <TextInput
+                style={styles.formInput}
+                placeholder="e.g. Product Demo Form"
+                placeholderTextColor="#64748b"
+                value={inputForm}
+                onChangeText={setInputForm}
+              />
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={[styles.submitLeadAdButton, isSubmitting && styles.submitAdBtnDisabled]}
+            onPress={handleSubmitLeadAd}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.submitLeadAdButtonText}>
+              {isSubmitting ? 'Signing & Dispatching Webhook...' : '🚀 Submit Lead Ad (Trigger POST /webhook)'}
+            </Text>
+          </TouchableOpacity>
+
+          {submitMessage ? (
+            <View
+              style={[
+                styles.submissionMessageBanner,
+                submitMessage.includes('❌') ? styles.submissionError : styles.submissionSuccess,
+              ]}
+            >
+              <Text style={styles.submissionMessageText}>{submitMessage}</Text>
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+
+      <View style={styles.leadStreamHeader}>
+        <Text style={styles.leadStreamTitle}>
+          📥 Live Lead Stream ({leads.length})
+        </Text>
+        <TouchableOpacity
+          style={styles.toggleFormButton}
+          onPress={() => setShowForm(!showForm)}
+        >
+          <Text style={styles.toggleFormButtonText}>{showForm ? 'Hide Form' : '📝 Open Lead Form'}</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={leads}
@@ -409,5 +538,119 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 3,
+  },
+  formCard: {
+    backgroundColor: '#1e293b',
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 8,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#3b82f6',
+    shadowColor: '#3b82f6',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  formCardHeader: {
+    marginBottom: 12,
+  },
+  formCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#60a5fa',
+  },
+  formCardSubtitle: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginTop: 3,
+    lineHeight: 17,
+  },
+  formGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 12,
+  },
+  inputFieldWrapper: {
+    flex: 1,
+    minWidth: 150,
+  },
+  fieldHeading: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#cbd5e1',
+    marginBottom: 4,
+  },
+  formInput: {
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: '#334155',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    color: '#f8fafc',
+    fontSize: 13,
+  },
+  submitLeadAdButton: {
+    backgroundColor: '#2563eb',
+    paddingVertical: 11,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2563eb',
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  submitLeadAdButtonText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  submissionMessageBanner: {
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  submissionSuccess: {
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    borderColor: '#22c55e',
+  },
+  submissionError: {
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: '#ef4444',
+  },
+  submissionMessageText: {
+    fontSize: 12,
+    color: '#f8fafc',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  leadStreamHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  leadStreamTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#e2e8f0',
+  },
+  toggleFormButton: {
+    backgroundColor: '#334155',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  toggleFormButtonText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#93c5fd',
   },
 });

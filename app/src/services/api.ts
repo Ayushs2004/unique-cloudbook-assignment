@@ -66,3 +66,35 @@ export async function simulateLead(customLead?: Partial<Lead>, baseUrl?: string)
   return result.lead as Lead;
 }
 
+export interface MetaLeadAdInput {
+  name: string;
+  email: string;
+  phone?: string;
+  formId?: string;
+  pageId?: string;
+}
+
+/**
+ * Submits user-input lead data through the full signed Meta Webhook pipeline.
+ */
+export async function submitMetaLeadAd(input: MetaLeadAdInput, baseUrl?: string) {
+  const urlBase = (baseUrl || currentServerUrl).replace(/\/+$/, '');
+  const url = `${urlBase}/leads/submit-lead-ad`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.error || `Failed to submit lead ad: ${response.statusText}`);
+  }
+
+  return await response.json();
+}
+
