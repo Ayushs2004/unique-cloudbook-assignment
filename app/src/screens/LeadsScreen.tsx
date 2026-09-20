@@ -27,10 +27,10 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
   const [showForm, setShowForm] = useState(true);
 
   // Form input fields for real test scenarios
-  const [inputName, setInputName] = useState('Ayush Soni');
-  const [inputEmail, setInputEmail] = useState('ayush@example.com');
-  const [inputPhone, setInputPhone] = useState('+91 9876543210');
-  const [inputForm, setInputForm] = useState('Product Demo Lead Form');
+  const [inputName, setInputName] = useState('');
+  const [inputEmail, setInputEmail] = useState('');
+  const [inputPhone, setInputPhone] = useState('');
+  const [inputForm, setInputForm] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
