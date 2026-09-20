@@ -44,6 +44,63 @@ function createApp() {
   return app;
 }
 
+const { leadStore } = require('./services/leadStore');
+
+/**
+ * Seeds initial realistic mock leads into the store on server startup.
+ * @param {import('./services/leadStore').InMemoryLeadStore} [store=leadStore]
+ */
+async function seedInitialLeads(store = leadStore) {
+  const mockLeads = [
+    {
+      id: 'lead_meta_101',
+      formId: 'form_growth_ad_01',
+      pageId: 'page_acme_official',
+      name: 'Alexander Wright',
+      email: 'alex.wright@example.com',
+      phone: '+1 (555) 234-5678',
+      rawFieldData: {
+        full_name: 'Alexander Wright',
+        email: 'alex.wright@example.com',
+        phone_number: '+1 (555) 234-5678',
+      },
+      receivedAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+    },
+    {
+      id: 'lead_meta_102',
+      formId: 'form_growth_ad_01',
+      pageId: 'page_acme_official',
+      name: 'Sophia Martinez',
+      email: 'sophia.m@example.com',
+      phone: '+1 (555) 876-5432',
+      rawFieldData: {
+        full_name: 'Sophia Martinez',
+        email: 'sophia.m@example.com',
+        phone_number: '+1 (555) 876-5432',
+      },
+      receivedAt: new Date(Date.now() - 1000 * 60 * 38).toISOString(),
+    },
+    {
+      id: 'lead_meta_103',
+      formId: 'form_spring_launch',
+      pageId: 'page_acme_official',
+      name: 'David Chen',
+      email: 'david.chen@enterprise.io',
+      phone: '+1 (555) 432-1098',
+      rawFieldData: {
+        full_name: 'David Chen',
+        email: 'david.chen@enterprise.io',
+        phone_number: '+1 (555) 432-1098',
+      },
+      receivedAt: new Date(Date.now() - 1000 * 60 * 85).toISOString(),
+    },
+  ];
+
+  for (const lead of mockLeads) {
+    await store.save(lead);
+  }
+}
+
 /**
  * Starts the HTTP server and attaches Socket.IO.
  */
@@ -54,6 +111,9 @@ function startServer() {
 
   // Attach Socket.IO to shared HTTP server
   initSocket(server);
+
+  // Seed realistic sample leads on boot
+  seedInitialLeads(leadStore);
 
   server.listen(config.PORT, () => {
     console.log(`[server] Meta Lead Ads Webhook server listening on port ${config.PORT}`);

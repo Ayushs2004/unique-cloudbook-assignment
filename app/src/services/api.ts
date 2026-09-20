@@ -41,3 +41,28 @@ export async function fetchLeads(since?: string, baseUrl?: string): Promise<Lead
   const data = await response.json();
   return data as Lead[];
 }
+
+/**
+ * Triggers the server to simulate a new incoming Meta lead in real time.
+ */
+export async function simulateLead(customLead?: Partial<Lead>, baseUrl?: string): Promise<Lead> {
+  const urlBase = (baseUrl || currentServerUrl).replace(/\/+$/, '');
+  const url = `${urlBase}/leads/simulate`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(customLead || {}),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to simulate lead: ${response.status} ${response.statusText}`);
+  }
+
+  const result = await response.json();
+  return result.lead as Lead;
+}
+

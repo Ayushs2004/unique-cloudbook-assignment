@@ -8,10 +8,12 @@ import {
   RefreshControl,
   SafeAreaView,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
 import { useLeadsQuery } from '../hooks/useLeadsQuery';
 import { useLeadSocket } from '../hooks/useLeadSocket';
 import { ConnectionStatus, Lead } from '../types/lead';
+import { simulateLead } from '../services/api';
 
 export interface LeadsScreenProps {
   serverUrl?: string;
@@ -20,6 +22,18 @@ export interface LeadsScreenProps {
 export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
   const { leads, loading, error, refetch, setLeads } = useLeadsQuery(serverUrl);
   const [refreshing, setRefreshing] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  const handleSimulateLead = useCallback(async () => {
+    try {
+      setIsSimulating(true);
+      await simulateLead(undefined, serverUrl);
+    } catch (err) {
+      console.error('Failed to simulate lead:', err);
+    } finally {
+      setIsSimulating(false);
+    }
+  }, [serverUrl]);
 
   // Latest seen receivedAt timestamp for incremental reconnect resync
   const latestTimestamp = useMemo(() => {
@@ -140,6 +154,13 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
         <Text style={styles.emptySubtitle}>
           Incoming leads from Meta Lead Ads will stream in here live via Webhooks & Socket.IO without manual refresh.
         </Text>
+        <TouchableOpacity
+          style={styles.emptySimulateBtn}
+          onPress={handleSimulateLead}
+          disabled={isSimulating}
+        >
+          <Text style={styles.simulateBtnText}>{isSimulating ? 'Sending...' : '⚡ Simulate Test Lead'}</Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -152,7 +173,17 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
           <Text style={styles.title}>Meta Lead Ads</Text>
           <Text style={styles.subtitle}>Real-time Lead Stream</Text>
         </View>
-        {renderStatusBadge(connectionStatus)}
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            testID="simulate-lead-btn"
+            style={[styles.simulateBtn, isSimulating && styles.simulateBtnDisabled]}
+            onPress={handleSimulateLead}
+            disabled={isSimulating}
+          >
+            <Text style={styles.simulateBtnText}>{isSimulating ? 'Sending...' : '⚡ Simulate Lead'}</Text>
+          </TouchableOpacity>
+          {renderStatusBadge(connectionStatus)}
+        </View>
       </View>
 
       {error ? (
@@ -344,5 +375,39 @@ const styles = StyleSheet.create({
     color: '#fca5a5',
     fontSize: 13,
     textAlign: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  simulateBtn: {
+    backgroundColor: '#2563eb',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    shadowColor: '#2563eb',
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  simulateBtnDisabled: {
+    opacity: 0.6,
+  },
+  simulateBtnText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  emptySimulateBtn: {
+    backgroundColor: '#2563eb',
+    marginTop: 18,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    shadowColor: '#2563eb',
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 3,
   },
 });
