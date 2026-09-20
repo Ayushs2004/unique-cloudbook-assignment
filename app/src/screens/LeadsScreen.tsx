@@ -246,7 +246,7 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
               <Text style={styles.fieldHeading}>Full Name *</Text>
               <TextInput
                 style={styles.formInput}
-                placeholder="e.g. Ayush Soni"
+                placeholder="e.g. Name"
                 placeholderTextColor="#64748b"
                 value={inputName}
                 onChangeText={setInputName}
@@ -256,7 +256,7 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
               <Text style={styles.fieldHeading}>Email Address *</Text>
               <TextInput
                 style={styles.formInput}
-                placeholder="e.g. ayush@example.com"
+                placeholder="e.g. mail@example.com"
                 placeholderTextColor="#64748b"
                 value={inputEmail}
                 onChangeText={setInputEmail}
@@ -268,7 +268,7 @@ export const LeadsScreen: React.FC<LeadsScreenProps> = ({ serverUrl }) => {
               <Text style={styles.fieldHeading}>Phone Number</Text>
               <TextInput
                 style={styles.formInput}
-                placeholder="e.g. +91 9876543210"
+                placeholder="e.g. +91 1234567890"
                 placeholderTextColor="#64748b"
                 value={inputPhone}
                 onChangeText={setInputPhone}
@@ -603,6 +603,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 3,
+  },
+  submitAdBtnDisabled: {
+    opacity: 0.6,
   },
   submitLeadAdButtonText: {
     color: '#ffffff',
