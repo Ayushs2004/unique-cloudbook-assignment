@@ -356,4 +356,5 @@ Send your audio and links to:
 
 ## 11.Screenshot
 <img width="1917" height="871" alt="image" src="https://github.com/user-attachments/assets/779dff4b-896a-467f-b7b3-e3f59d9eb83a" />
+<img width="1917" height="876" alt="image" src="https://github.com/user-attachments/assets/63c8759d-8826-4299-8524-6305a2e10194" />
 
