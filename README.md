@@ -255,7 +255,22 @@ Time:        4.316 s
 
 ### 7.1 Quick Start (Local Demo)
 
-#### Terminal 1: Backend Server
+#### Option A: One-Command Runner (From Root Directory)
+You can run everything directly from the project root:
+```bash
+# Run both Backend Server + Mobile App concurrently
+npm run dev
+
+# Or run components individually from root:
+npm run dev:server      # Starts Backend Server on http://localhost:3000 (nodemon)
+npm run dev:app         # Starts Expo App Metro bundler
+npm run dev:web         # Starts Backend Server + Expo Web directly
+npm test                # Runs all 36 server and app automated tests
+```
+
+#### Option B: Separate Terminals
+
+##### Terminal 1: Backend Server
 ```bash
 cd server
 npm install
@@ -264,7 +279,7 @@ npm start
 * Server listens at `http://localhost:3000`.
 * Health check: `http://localhost:3000/health`.
 
-#### Terminal 2: React Native / Expo App
+##### Terminal 2: React Native / Expo App
 ```bash
 cd app
 npm install
