@@ -352,3 +352,8 @@ Send your audio and links to:
 1. **In-Memory Store for POC**: An in-memory Map behind the `LeadStore` interface satisfies the POC. In production, swap [`server/services/leadStore.js`](file:///c:/Users/AYUSH%20SONI/OneDrive/Desktop/assignment/server/services/leadStore.js) with PostgreSQL or Redis without modifying any route or socket logic.
 2. **Horizontal Scaling**: If scaling beyond one Node.js instance behind a load balancer, attach `@socket.io/redis-adapter` so `emitNewLead` fans out across all server nodes.
 3. **Secrets Management**: For this POC, environment variables in `.env` are used. In enterprise production, inject values via AWS Secrets Manager or HashiCorp Vault.
+
+
+## 11.Screenshot
+<img width="1917" height="871" alt="image" src="https://github.com/user-attachments/assets/779dff4b-896a-467f-b7b3-e3f59d9eb83a" />
+
