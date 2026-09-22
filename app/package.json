@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start",
     "web": "expo start --web",
+    "build:web": "expo export -p web",
     "test": "jest"
   },
   "dependencies": {

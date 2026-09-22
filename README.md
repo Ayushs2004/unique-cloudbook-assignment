@@ -26,6 +26,23 @@ The answer is an absolute **no**. Attempting a client-only architecture introduc
 
 ---
 
+### 2.1 Universal React Native Architecture: Why Expo Web for the Demo & Evaluation
+
+While the client application is **100% genuine React Native** (built strictly with core mobile primitives: `<View>`, `<Text>`, `<FlatList>`, `<SafeAreaView>`, `<TouchableOpacity>`, and `<StyleSheet>`), we configured and targeted **React Native for Web (`react-native-web`) via Expo** for three deliberate engineering reasons:
+
+1. **Frictionless Review & Zero-Setup Evaluation**:
+   - The evaluator does not need to install 20+ GB of Android Studio or Xcode, configure virtual emulators, or connect physical cables.
+   - Running `npm run dev` or `npm run dev:web` opens the complete mobile UI immediately in any modern browser at `http://localhost:8081`.
+   - The identical codebase runs natively on physical iPhones and Android devices via **Expo Go** by scanning the terminal QR code.
+
+2. **High-Resolution, Zero-Latency Video Demonstration**:
+   - For video walkthroughs (e.g., Loom), running the mobile UI in the browser allows demonstrating the live Webhook trigger, backend console logs, and FlatList stream updates **side-by-side in crisp 1080p** without the frame drops, Wi-Fi lag, or resolution compression of phone-mirroring software.
+
+3. **Proof of Universal Cross-Platform Architecture**:
+   - It proves our state management, REST hydration hooks ([`useLeadsQuery.ts`](file:///c:/Users/AYUSH%20SONI/OneDrive/Desktop/assignment/app/src/hooks/useLeadsQuery.ts)), and real-time Socket.IO subscriptions ([`useLeadSocket.ts`](file:///c:/Users/AYUSH%20SONI/OneDrive/Desktop/assignment/app/src/hooks/useLeadSocket.ts)) are truly cross-platform — executing identically across iOS, Android, and Web from a single unified codebase.
+
+---
+
 ## 3. System Architecture & Component Design
 
 ### 3.1 High-Level Flowchart

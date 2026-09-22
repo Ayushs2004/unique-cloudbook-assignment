@@ -12,6 +12,8 @@
     "start:app": "npm --prefix app start",
     "web": "npm --prefix app run web",
     "dev:web": "concurrently -n \"SERVER,APP\" -c \"blue,green\" \"npm run dev:server\" \"npm run web\"",
+    "build:web": "npm --prefix app run build:web",
+    "build": "npm run build:web",
     "test": "npm --prefix server test && npm --prefix app test",
     "test:server": "npm --prefix server test",
     "test:app": "npm --prefix app test",
